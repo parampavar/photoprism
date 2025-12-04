@@ -34,6 +34,7 @@ func init() {
 		RequestFormat:     ApiFormatOpenAI,
 		ResponseFormat:    ApiFormatOpenAI,
 		FileScheme:        scheme.Data,
+		DefaultModel:      openai.DefaultModel,
 		DefaultResolution: openai.DefaultResolution,
 		DefaultKey:        openai.APIKeyPlaceholder,
 	})

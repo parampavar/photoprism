@@ -133,8 +133,6 @@ func (m *Model) IsDefault() bool {
 		return m.Name == NsfwModel.Name
 	case ModelTypeFace:
 		return m.Name == FacenetModel.Name
-	case ModelTypeCaption:
-		return m.Name == CaptionModel.Name
 	}
 
 	return false
@@ -467,32 +465,37 @@ func (m *Model) ApplyEngineDefaults() {
 	}
 
 	engine := strings.TrimSpace(strings.ToLower(m.Engine))
+
 	if engine == "" {
 		return
 	}
 
 	if info, ok := EngineInfoFor(engine); ok {
-		if m.Service.Uri == "" {
+		if strings.TrimSpace(m.Model) == "" && strings.TrimSpace(m.Name) == "" {
+			m.Model = info.DefaultModel
+		}
+
+		if strings.TrimSpace(m.Service.Uri) == "" {
 			m.Service.Uri = info.Uri
 		}
 
-		if m.Service.RequestFormat == "" {
+		if strings.TrimSpace(m.Service.RequestFormat) == "" {
 			m.Service.RequestFormat = info.RequestFormat
 		}
 
-		if m.Service.ResponseFormat == "" {
+		if strings.TrimSpace(m.Service.ResponseFormat) == "" {
 			m.Service.ResponseFormat = info.ResponseFormat
 		}
 
-		if info.FileScheme != "" && m.Service.FileScheme == "" {
+		if strings.TrimSpace(m.Service.FileScheme) == "" && info.FileScheme != "" {
 			m.Service.FileScheme = info.FileScheme
 		}
 
-		if info.DefaultResolution > 0 && m.Resolution <= 0 {
+		if m.Resolution <= 0 && info.DefaultResolution > 0 {
 			m.Resolution = info.DefaultResolution
 		}
 
-		if strings.TrimSpace(m.Service.Key) == "" && strings.TrimSpace(info.DefaultKey) != "" {
+		if strings.TrimSpace(m.Service.Key) == "" && info.DefaultKey != "" {
 			m.Service.Key = info.DefaultKey
 		}
 	}

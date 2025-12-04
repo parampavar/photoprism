@@ -2,6 +2,7 @@ package vision
 
 import (
 	"context"
+	"os"
 	"strings"
 
 	"github.com/photoprism/photoprism/internal/ai/vision/ollama"
@@ -23,17 +24,38 @@ func init() {
 		Defaults: ollamaDefaults{},
 	})
 
+	registerOllamaEngineDefaults()
+}
+
+// registerOllamaEngineDefaults selects the default Ollama endpoint based on the
+// available credentials and registers the engine alias accordingly. When an
+// API key is configured, we default to the hosted Cloud endpoint; otherwise we
+// assume a self-hosted instance reachable via the docker-compose default.
+// This keeps the zero-config path fast for local dev while automatically using
+// the cloud service when credentials are present.
+func registerOllamaEngineDefaults() {
+	defaultModel := ollama.DefaultModel
+	defaultUri := ollama.DefaultUri
+
+	// Detect Ollama cloud API key.
+	if key := os.Getenv(ollama.APIKeyEnv); len(key) > 50 && strings.Contains(key, ".") {
+		defaultModel = ollama.CloudModel
+		defaultUri = ollama.CloudUri
+	}
+
 	// Register the human-friendly engine name so configuration can simply use
 	// `Engine: "ollama"` and inherit adapter defaults.
 	RegisterEngineAlias(ollama.EngineName, EngineInfo{
+		Uri:               defaultUri,
 		RequestFormat:     ApiFormatOllama,
 		ResponseFormat:    ApiFormatOllama,
 		FileScheme:        scheme.Base64,
+		DefaultModel:      defaultModel,
 		DefaultResolution: ollama.DefaultResolution,
 		DefaultKey:        ollama.APIKeyPlaceholder,
 	})
 
-	CaptionModel.Engine = ollama.EngineName
+	// Keep the default caption model config aligned with the defaults.
 	CaptionModel.ApplyEngineDefaults()
 }
 

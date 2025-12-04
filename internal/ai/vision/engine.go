@@ -75,6 +75,7 @@ type EngineInfo struct {
 	RequestFormat     ApiFormat
 	ResponseFormat    ApiFormat
 	FileScheme        string
+	DefaultModel      string
 	DefaultResolution int
 	DefaultKey        string // Optional placeholder key (e.g., ${OPENAI_API_KEY}); applied only when Service.Key is empty.
 }
